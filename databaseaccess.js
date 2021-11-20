@@ -37,38 +37,14 @@ function store_log(req, res) {
 
 //Fetch function is not used right now but I planned to create a Frontend to access the logs
 function fetch_log(req, res) {
-    let decoder = new strdec('utf-8');
-    let buffer = "";
-    req.on("data", function (chunk) {
-        buffer += decoder.write(chunk);
-    })
-    req.on("end", function () {
-        buffer += decoder.end();
-        var carobj = JSON.parse(buffer);
-        mongoclient.connect(URI, function (err, database) {
-            if (err) throw err;
-            let dbobj = database.db("Parking");
-            console.log("connected to database for deletion");
-            var query = {carreg : carobj.carreg}
-            dbobj.collection("Cars").deleteOne(query,function(err,resp){
-                if(err) throw err;
-                console.log(resp);
-            })
-            logobj = carobj;
-            logobj.reqtype = "Exit";
-            dbobj.collection("log").insertOne(logobj,function(err,resp){
-                if(err) throw err;
-                console.log("log recorded");
-            })
-        })
         res.writeHead(200, "OK", { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-        res.write(JSON.stringify(buffer));
+        res.write("fetch Endpoint Hit");
         res.end();
-    })
-}
+    }
 
 http.createServer(function (req, res) {
     if (req.method == "OPTIONS") {
+        //For preflight if created frontend
         res.writeHead(200, "OK", { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*', 'Access-Control-Allow-Methods': '*' });
         res.end();
     }
