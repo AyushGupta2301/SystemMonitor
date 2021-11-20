@@ -45,12 +45,13 @@ def monitor():
         if(i[3]>=50):
             message+=" {Process-id : " + str(i[0]) + " :: Name : <b><i>" + i[2] + "</i></b> :: Started : "+ str(i[1])[0:19] + " :: Memory : "+ i[4] +" :: CPU Usage : "+ str(i[3])+"}" 
             paramperson = {'chat_id':'1158109698','text':message,'parse_mode':'HTML'}
-            resp = requests.post('https://api.telegram.org/bot2133097358:AAFLewQeNHQysJS6sOIJ0L1ZMRuSX-rNTc8/sendMessage',params=paramperson)
+            resp = requests.post('https://api.telegram.org/bot<token>/sendMessage',params=paramperson)
+            # Removed the bot token for security reasons
             if(resp.status_code==200):
                 print("Report Sent at " + current_time)
             logdata = {'Log Time':current_time,'Process Name':i[2],'Process ID':str(i[0]),'Process Start Time':str(i[1]),'Memory Held':i[4],'CPU Usage':str(i[3]),'Path':i[5]}
             try:
-                logresp = requests.post('http://127.0.0.1:8081/store',json=logdata)
+                logresp = requests.post('http://192.168.1.5:8081/store',json=logdata)
             except:
                 print("Connection Error With Database, Log recording unsuccessful")
                 continue
