@@ -4,8 +4,9 @@ var util = require('util')
 var strdec = require('string_decoder').StringDecoder
 var mongo = require('mongodb')
 var mongoclient = mongo.MongoClient
-let URI = "<URI>"
-// Removed the URI for security reasons 
+let URI = "mongodb://ayush:ayush2301@localhost:27017"
+
+
 function store_log(req, res) {
     let decoder = new strdec('utf-8');
     let buffer = "";
@@ -26,13 +27,34 @@ function store_log(req, res) {
                 res.write(JSON.stringify(buffer));
                 res.end();
             })
-            // console.log("log recorded");
         })
 
     })
-        // res.writeHead(200, "OK", { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-        // res.write(JSON.stringify(buffer));
-        // res.end();
+}
+
+function store_logpkt(req, res) {
+    let decoder = new strdec('utf-8');
+    let buffer = "";
+    req.on("data", function (chunk) {
+        buffer += decoder.write(chunk);
+    })
+    req.on("end", function () {
+        buffer += decoder.end();
+        var logobj = JSON.parse(buffer);
+        mongoclient.connect(URI, function (err, database) {
+            if (err) throw err;
+            let dbobj = database.db("LogRecords");
+            console.log("connected to database for Storage");
+            dbobj.collection("PktLogs").insertOne(logobj,function(err,resp){
+                if(err) throw err;
+                console.log(resp);
+                res.writeHead(200, "OK", { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+                res.write(buffer);
+                res.end();
+            })
+        })
+
+    })
 }
 
 //Fetch function is not used right now but I planned to create a Frontend to access the logs
@@ -63,6 +85,9 @@ http.createServer(function (req, res) {
             case "/fetch":
                 fetch_log(req,res);
                 break;
+            case "/storepkt":
+                store_logpkt(req,res);
+                break;
         }
     }
-}).listen(8081, "192.168.1.5");
+}).listen(8081, "192.168.1.10");

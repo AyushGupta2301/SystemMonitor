@@ -1,18 +1,11 @@
-import psutil
-import os
-processes = []
-for i in psutil.process_iter():
-    processes.append(i)
+# print_eth_json.py
+import json
+import subprocess as sp
+import pprint
 
-scripts = []
-paths = []
-for pid in processes:
-    try:
-        scripts.append(pid.cmdline()[1])
-        print(pid.exe())
-    except:
-        pass
-
-for script in scripts:
-    paths.append(os.path.abspath(script))
-
+json_str = sp.check_output("tshark -c 2 -T json".split(' ')).decode('utf-8')
+tshark_pkts = json.loads(json_str)
+# Transform tshark json into a scapy-like packet-json list.
+pkts_json = [pkt['_source']['layers'] for pkt in tshark_pkts]
+# pprint.pprint(pkts_json[0])
+print(pkts_json[0])
